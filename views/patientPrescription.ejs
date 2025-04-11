@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>View Prescription</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <link rel="icon" href="images/medicine.png">
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f7f1e3;
+      padding: 30px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #ffd779;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      min-height: 600px;
+    }
+    h2 {
+      text-align: center;
+      color: #1565c0;
+    }
+    .pdf-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      background: white;
+    }
+    .back-button {
+      background-color: #0d47a1;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .back-button:hover {
+      background-color: #1565c0;
+    }
+    .signature-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #signature-pad {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      display: inline-block;
+    }
+    .signature-buttons {
+      margin-top: 10px;
+    }
+    .signature-buttons button {
+      padding: 8px 16px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 4px;
+      background-color: #0d47a1;
+      color: white;
+      cursor: pointer;
+    }
+    .signature-buttons button:hover {
+      background-color: #1565c0;
+    }
+    .signature-upload {
+      margin-top: 10px;
+    }
+    .signature-upload input[type="file"] {
+      display: none;
+    }
+    .signature-upload label {
+      padding: 8px 16px;
+      background-color: #0d47a1;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .signature-upload label:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+
+<a href="/priscriptions" class="back-button">← Back</a>
+
+<div class="container">
+  <h2>🩺 PRESCRIPTION VIEW</h2>
+  <div class="pdf-container">
+    <iframe id="pdf-viewer"></iframe>
+  </div>
+  <div class="signature-container">
+    <canvas id="signature-pad" width="300" height="100"></canvas>
+    <div class="signature-buttons">
+      <button onclick="clearSignature()">Clear Signature</button>
+      <button onclick="generatePDFWithSignature()">Apply Signature</button>
+    </div>
+    <div class="signature-upload">
+      <input type="file" id="signature-upload" accept="image/png" onchange="uploadSignature(event)">
+      <label for="signature-upload">Upload Signature (PNG)</label>
+    </div>
+  </div>
+</div>
+
+<script>
+  let generatedPdfBlob = null;
+  let pdfUrl = null;
+  let signatureData = null;
+  const canvas = document.getElementById('signature-pad');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+
+  // Signature pad functionality
+  canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (isDrawing) {
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    isDrawing = false;
+    signatureData = canvas.toDataURL('image/png');
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    isDrawing = false;
+  });
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureData = null;
+  }
+
+  function uploadSignature(event) {
+    const file = event.target.files[0];
+    if (file && file.type === 'image/png') {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+          const scaledWidth = img.width * scale;
+          const scaledHeight = img.height * scale;
+          ctx.drawImage(img, (canvas.width - scaledWidth) / 2, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight);
+          signatureData = canvas.toDataURL('image/png');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please upload a PNG image file.');
+    }
+  }
+
+  window.onload = function () {
+    if (!localStorage.getItem("prescriptionData")) {
+      const sampleData = {
+        name: "John Doe",
+        mobile: "1234567890",
+        age: "30",
+        diagnosis: "Fever",
+        labtest: "Blood Test",
+        labreport: "Normal results with slightly elevated WBC count",
+        spo2: "98%",
+        weight: "70kg",
+        bp: "120/80",
+        pulse: "72",
+        temp: "37.5°C",
+        medicines: [
+          { name: "Paracetamol", type: "Tablet", dosage: "500mg", quantity: "5", remark: "As needed", content: "Take after food" },
+          { name: "Ibuprofen", type: "Tablet", dosage: "400mg", quantity: "3", remark: "As needed", tapering: [{ dosage: "200mg", days: "2" }] }
+        ]
+      };
+      localStorage.setItem("prescriptionData", JSON.stringify(sampleData));
+    }
+
+    const prescription = JSON.parse(localStorage.getItem("prescriptionData"));
+    if (prescription) {
+      generatePDF(prescription).catch(error => console.error("PDF Generation Error:", error));
+    } else {
+      alert("No prescription data found.");
+      document.getElementById("pdf-viewer").src = "about:blank";
+    }
+  };
+
+  async function generatePDF(prescription, includeSignature = false) {
+    try {
+      const { jsPDF } = window.jspdf;
+      if (!jsPDF) throw new Error("jsPDF library not loaded");
+
+      const doc = new jsPDF();
+      let y = 10;
+
+      // Header
+      doc.setFillColor(0, 150, 136);
+      doc.rect(0, 0, 210, 30, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Dr MANSOOR ALI.VP , MD (PHYSICIAN)", 105, 12, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text("General Practitioner | Reg NO: 35083 | +91 9895353078 ", 105, 18, { align: 'center' });
+      doc.setFontSize(13);
+      doc.text("Pathappiriyam | BOOKING NO: +918606344694", 105, 24, { align: 'center' });
+
+      y = 38;
+
+      // Patient Information
+      const name = prescription.name || "Unknown";
+      const phone = prescription.mobile || prescription.phone || "N/A";
+      const age = prescription.age || "N/A";
+      const diagnosis = prescription.diagnosis || "N/A";
+      const labtest = prescription.labtest || "-";
+      const labreport = prescription.labreport || "-";
+      const spo2 = prescription.spo2 || "-";
+      const weight = prescription.weight || "-";
+      const bp = prescription.bp || "-";
+      const pulse = prescription.pulse || "-";
+      const temp = prescription.temp || "-";
+      const date = new Date().toLocaleString();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Patient Information", 10, y); y += 4;
+
+      doc.setFillColor(240, 240, 240);
+      doc.rect(14, y, 182, 8, 'F');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Details", 16, y + 6);
+      doc.text("Vitals", 120, y + 6);
+      y += 9;
+
+      const patientData = [
+        { field: "Name", value: name, vitals: "SpO2", vitalsValue: spo2 }, 
+        { field: "Phone", value: phone, vitals: "BP", vitalsValue: bp },
+        { field: "Age", value: age, vitals: "Pulse", vitalsValue: pulse },
+        { field: "Diagnosis", value: diagnosis, vitals: "Temp", vitalsValue: temp },
+        { field: "Date & Time", value: date, vitals: "Weight", vitalsValue: weight }
+      ];
+
+      doc.setFont("helvetica", "normal");
+      patientData.forEach(row => {
+        doc.text(row.field, 16, y + 4);
+        doc.text(row.value, 60, y + 4);
+        doc.text(row.vitals, 120, y + 4);
+        doc.text(row.vitalsValue, 160, y + 4);
+        y += 6;
+      });
+      y += 6;
+
+      
+      // Lab Report
+      if (labreport !== "-") {
+        doc.setFont("helvetica", "bold");
+        doc.text("Lab Report:", 14, y); y += 6;
+        doc.setFont("helvetica", "normal");
+        const labreportLines = doc.splitTextToSize(labreport, 180);
+        doc.text(labreportLines, 14, y); y += labreportLines.length * 6 + 2;
+      }
+
+      doc.setDrawColor(120);
+      doc.setLineWidth(0.4);
+      doc.line(10, y, 200, y);
+
+      // Medicines
+      y += 2;
+      doc.setFontSize(12);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(14, y, 182, 8, 'F');
+      doc.text("Sl", 16, y + 6);
+      doc.text("Medicine", 25, y + 6);
+      doc.text("Type", 70, y + 6);
+      doc.text("Dosage", 100, y + 6);
+      doc.text("Days", 130, y + 6);
+      doc.text("Remarks", 160, y + 6);
+      y += 8;
+
+      doc.setFontSize(11);
+      prescription.medicines?.forEach((med, index) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFillColor(250, 250, 250);
+        doc.rect(14, y, 182, 8, 'F');
+        
+        doc.text(`${index + 1}`, 16, y + 6);
+        const medicineNameLines = doc.splitTextToSize(med.name || "-", 40);
+        medicineNameLines.forEach((line, lineIndex) => {
+          doc.text(line, 25, y + 6 + lineIndex * 5);
+        });
+        doc.text(med.type || "-", 70, y + 6);
+        doc.text(med.dosage || "-", 100, y + 6);
+        doc.text(med.quantity || "-", 130, y + 6);
+        doc.text(med.remark || "-", 160, y + 6);
+        y += Math.max(8, medicineNameLines.length * 5);
+
+        if (med.content) {
+          doc.setFont("helvetica", "italic");
+          const contentLines = doc.splitTextToSize(`(${med.content})`, 150);
+          doc.text(contentLines, 27, y + 2);
+          y += contentLines.length * 5;
+        }
+
+        if (med.tapering) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(100, 100, 100);
+          med.tapering.forEach((taper) => {
+            doc.text(taper.dosage || "-", 100, y + 2);
+            doc.text(taper.days || "-", 130, y + 2);
+            y += 5;
+          });
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+        }
+      });
+
+      // Footer
+      // Lab Tests
+      y += 10;
+      doc.setFont("helvetica", "bold");
+      doc.text("Lab Tests On Next Visit:", 14, y); y += 6;
+      doc.setFont("helvetica", "normal");
+      const labtestLines = doc.splitTextToSize(labtest, 180);
+      doc.text(labtestLines, 14, y); y += labtestLines.length * 6 + 2;
+      
+      y = 270;
+      doc.setFillColor(250, 250, 250);
+      doc.rect(0, y, 210, 12, 'F');
+      doc.setFontSize(10);
+      doc.text("    Visit us: www.clinicppm.com ", 50, y + 9, { align: 'left' });
+      doc.text("    Prescription Generated by Suhaim Software", 50, y + 4, { align: 'left' });
+
+      // QR Code
+      const pdfBlob = doc.output("blob");
+      generatedPdfBlob = pdfBlob;
+      pdfUrl = URL.createObjectURL(pdfBlob);
+      const qrCanvas = document.createElement("canvas");
+      await QRCode.toCanvas(qrCanvas, pdfUrl, { width: 80, errorCorrectionLevel: 'H' });
+      const qrImageData = qrCanvas.toDataURL("image/png");
+      doc.addImage(qrImageData, "PNG", 14, 255, 30, 30);
+
+      // Signature
+      if (includeSignature && signatureData) {
+        doc.addImage(signatureData, "PNG", 150, 250, 50, 25);
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.text("DR MANSOOR ALI V.P", 150, 278);
+      }
+
+      finalizeAndDisplayPDF(doc, name);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      document.getElementById("pdf-viewer").src = "about:blank";
+      alert("Failed to generate prescription preview. Check console for details.");
+    }
+  }
+
+  function finalizeAndDisplayPDF(doc, patientName) {
+    const updatedPdfBlob = doc.output("blob");
+    generatedPdfBlob = updatedPdfBlob;
+    const updatedPdfUrl = URL.createObjectURL(updatedPdfBlob);
+    console.log("Generated PDF URL:", updatedPdfUrl);
+    document.getElementById("pdf-viewer").src = updatedPdfUrl;
+    const safeName = patientName.trim().replace(/\s+/g, "_") || "Unknown_Patient";
+    doc.save(`${safeName}_Prescription.pdf`);
+  }
+
+  function generatePDFWithSignature() {
+    const prescription = JSON.parse(localStorage.getItem("prescriptionData"));
+    if (prescription) {
+      generatePDF(prescription, true).catch(error => console.error("Signature PDF Error:", error));
+    }
+  }
+</script>
+
+</body>
+</html>

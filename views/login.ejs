@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="icon" href="images/medicine.png">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to right, #2193b0, #6dd5ed);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .form-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      animation: fadeIn 1s ease;
+      position: relative;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #2193b0;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .exit-button {
+      position: absolute;
+      top: -50px;
+      left: -9px;
+      background-color: #fd473ace;
+      color: white;
+      width: 10%;
+      padding: 3px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #e92525e7;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    }
+    .exit-button:hover {
+      background-color: #d32f2f00;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-box">
+    <button class="exit-button" onclick="window.location.href='/'" title="Exit to Home">🔙</button>
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      if (username === "user12" && password === "123") {
+        window.location.href = "/dashboard";
+      } else {
+        alert("Invalid username or password!");
+      }
+    });
+  </script>
+</body>
+</html>

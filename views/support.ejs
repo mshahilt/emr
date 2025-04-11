@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="images/medicine.png">
+  <title>Customer Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f1e3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 450px;
+      height: 90vh;
+      background: #ffd779;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #007bff;
+      color: white;
+      padding: 16px;
+      font-weight: bold;
+      text-align: center;
+      position: relative;
+    }
+    .exit-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: #eef1f5;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      background: #fff;
+      border-radius: 10px;
+      position: relative;
+      max-width: 90%;
+    }
+    .message.user {
+      background: #007bff;
+      color: white;
+      margin-left: auto;
+    }
+    .message .meta {
+      font-size: 10px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    .message .actions {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 12px;
+      display: flex;
+      gap: 5px;
+    }
+    .message .actions span {
+      cursor: pointer;
+      color: #888;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      align-items: center;
+      gap: 8px;
+    }
+    .chat-input input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    .chat-input button {
+      padding: 10px 15px;
+      background: #007bff;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+    }
+    .chat-input input[type="file"] {
+      display: none;
+    }
+    .file-label {
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .mic-btn {
+      font-size: 20px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    Customer Chat
+    <button class="exit-btn" onclick="window.location.href='/dashboard'">🔙 Exit</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input">
+    <label class="file-label" for="fileUpload">📎</label>
+    <input type="file" id="fileUpload" accept="image/*,video/*" onchange="handleFile(event)" />
+    <input type="text" id="chatInput" placeholder="Type a message..." />
+    <button class="mic-btn" onclick="startVoice()">🎤</button>
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  const username = prompt("Enter your name") || "User";
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+
+  const ws = new WebSocket('wss://echo.websocket.org');
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.username && data.message) {
+      displayMessage(data.username, data.message, false, data.timestamp, data.type);
+    }
+  };
+
+  function sendMessage(type = 'text', content = '') {
+    const msg = type === 'text' ? chatInput.value.trim() : content;
+    if (!msg) return;
+    const timestamp = new Date().toLocaleString();
+    const payload = { username, message: msg, timestamp, type };
+    ws.send(JSON.stringify(payload));
+    displayMessage(username, msg, true, timestamp, type);
+    if (type === 'text') chatInput.value = '';
+  }
+
+  function displayMessage(user, msg, isSender, timestamp, type) {
+    const message = document.createElement('div');
+    message.className = `message ${isSender ? 'user' : ''}`;
+    let content = '';
+    if (type === 'image') {
+      content = `<img src="${msg}" style="max-width:100%; border-radius:8px;" />`;
+    } else if (type === 'video') {
+      content = `<video src="${msg}" controls style="max-width:100%; border-radius:8px;"></video>`;
+    } else {
+      content = `<div><strong>${user}:</strong> ${msg}</div>`;
+    }
+    message.innerHTML = `
+      ${content}
+      <div class="meta">${timestamp}</div>
+      <div class="actions">
+        <span onclick="deleteMessage(this)">🗑️</span>
+        <span onclick="shareOnWhatsApp('${encodeURIComponent(user + ': ' + msg)}')">📤</span>
+      </div>
+    `;
+    chatMessages.appendChild(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function deleteMessage(el) {
+    const message = el.closest('.message');
+    if (confirm("Delete this message?")) {
+      message.remove();
+    }
+  }
+
+  function shareOnWhatsApp(text) {
+    const url = `https://wa.me/?text=${text}`;
+    window.open(url, '_blank');
+  }
+
+  function handleFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const fileURL = e.target.result;
+      const type = file.type.startsWith("image") ? "image" : file.type.startsWith("video") ? "video" : "text";
+      sendMessage(type, fileURL);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function startVoice() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech Recognition not supported in your browser.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      chatInput.value += transcript + ' ';
+    };
+    recognition.onerror = (e) => {
+      console.error("Voice error:", e.error);
+    };
+  }
+</script>
+
+</body>
+</html>

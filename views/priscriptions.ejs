@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prescriptions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/medicine.png">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f7f1e3;
+      margin: 0;
+      padding: 30px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #64bbfd;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box; /* Added for better width control */
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .rx-card {
+      background: #f1f8ff;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      word-wrap: break-word; /* Helps prevent long text overflow */
+    }
+    .rx-card strong {
+      color: #0d47a1;
+    }
+    .rx-card .medicine-item {
+      margin-left: 10px;
+      padding-left: 5px;
+    }
+    .rx-card button {
+      margin-top: 10px;
+      margin-right: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-edit {
+      background-color: #ffb300;
+      color: #fff;
+    }
+    .btn-view {
+      background-color: #43a047;
+      color: #fff;
+    }
+    .btn-delete {
+      background-color: #e53935;
+      color: #fff;
+    }
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      background-color: #0d47a1;
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    }
+    .filter-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .filter-btn.active {
+      background-color: #1565c0;
+      color: white;
+    }
+    .date-filter-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center; /* Align items vertically */
+      flex-wrap: wrap; /* Allow wrapping */
+    }
+    .date-filter-container input[type="date"] {
+      flex: 1;
+      min-width: 150px; /* Ensure date input doesn't get too small */
+      margin-bottom: 0;
+    }
+    .date-filter-container button { /* Style the clear button like filter buttons */
+       padding: 8px 15px;
+       border: none;
+       border-radius: 6px;
+       background-color: #e0e0e0;
+       cursor: pointer;
+       font-size: 0.9rem;
+    }
+
+  </style>
+</head>
+<body>
+
+<a href="/dashboard" class="back-button">← Back to Dashboard</a>
+
+<div class="container">
+  <h2>📋 SAVED PRESCRIPTIONS</h2>
+
+  <input type="text" id="searchName" placeholder="Search by name..." oninput="renderPrescriptions()" />
+
+  <div class="filter-buttons">
+    <button class="filter-btn active" onclick="setDateFilter('all')">All</button>
+    <button class="filter-btn" onclick="setDateFilter('today')">Today</button>
+    <button class="filter-btn" onclick="setDateFilter('yesterday')">Yesterday</button>
+  </div>
+
+  <div class="date-filter-container">
+    <input type="date" id="filterDate" onchange="setDateFilter('custom')" />
+    <button onclick="clearDateFilter()">Clear Date</button> 
+  </div>
+
+  <div id="rxList"></div>
+</div>
+
+<script>
+  let currentFilter = 'all';
+
+  function renderPrescriptions() {
+    const rxList = document.getElementById("rxList");
+    const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+    const searchName = document.getElementById("searchName").value.toLowerCase();
+    const filterDateInput = document.getElementById("filterDate");
+
+    rxList.innerHTML = ""; // Clear previous list
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // --- CHANGE: Iterate backwards using a for loop ---
+    for (let index = prescriptions.length - 1; index >= 0; index--) {
+      const rx = prescriptions[index]; // Get the prescription for the current index
+
+      // --- Filtering Logic ---
+      // Use 'continue' to skip the current iteration instead of 'return' which would exit the function
+      if (!rx || !rx.date) continue; // Added check for rx existence
+
+      const phone = rx.phone || 'N/A';
+      const diagnosis = rx.diagnosis || 'N/A';
+      const rxDate = new Date(rx.date);
+      rxDate.setHours(0, 0, 0, 0);
+
+      // Check name first for potential performance improvement if searching
+      if (searchName && (!rx.name || !rx.name.toLowerCase().includes(searchName))) continue;
+
+      // Date Filtering
+      if (currentFilter === 'today' && rxDate.getTime() !== today.getTime()) continue;
+      if (currentFilter === 'yesterday' && rxDate.getTime() !== yesterday.getTime()) continue;
+      if (currentFilter === 'custom' && filterDateInput.value) {
+        // Parse date input robustly, considering timezone offsets
+        const filterDateParts = filterDateInput.value.split('-');
+        const filterDate = new Date(Date.UTC(filterDateParts[0], filterDateParts[1] - 1, filterDateParts[2]));
+        filterDate.setUTCHours(0, 0, 0, 0); // Ensure comparison is at UTC midnight
+
+         // Also convert rxDate to UTC midnight for comparison
+        const rxDateUtc = new Date(Date.UTC(rxDate.getFullYear(), rxDate.getMonth(), rxDate.getDate()));
+        rxDateUtc.setUTCHours(0, 0, 0, 0);
+
+        if (rxDateUtc.getTime() !== filterDate.getTime()) continue;
+      }
+      // --- End Filtering Logic ---
+
+      // --- Card Creation Logic ---
+      const card = document.createElement("div");
+      card.className = "rx-card";
+
+      let html = `
+        <strong>👤 Name:</strong> ${rx.name || 'N/A'}<br>
+        <strong>📞 Phone:</strong> ${phone}<br>
+        <strong>🩺 Diagnosis:</strong> ${diagnosis}<br>
+        <strong>🧪 Lab Report:</strong> ${rx.labReport || 'N/A'}<br>
+        <strong>📅 Date:</strong> ${rx.date || 'N/A'}<br><br>
+        <strong>💊 Medicines:</strong><br>
+      `;
+
+      if (rx.medicines && rx.medicines.length > 0) {
+        rx.medicines.forEach(med => {
+           // Add checks for med properties
+           const medName = med.name || 'Unknown Medicine';
+           const medType = med.type || 'N/A';
+           const medDosage = med.dosage || 'N/A';
+           const medQuantity = med.quantity || 'N/A';
+           html += `<div class="medicine-item">➤ <strong>${medName}</strong> (${medType}) | Dosage: ${medDosage} | Qty: ${medQuantity}</div>`;
+        });
+      } else {
+        html += "<em class='medicine-item'>No medicines listed.</em><br>";
+      }
+
+      html += `
+        <br>
+        <strong>Vitals:</strong><br>
+        SpO₂: ${rx.spo2 || 'N/A'},
+        Weight: ${rx.weight || 'N/A'},
+        BP: ${rx.bp || 'N/A'},
+        Pulse: ${rx.pulse || 'N/A'},
+        Temp: ${rx.temperature || 'N/A'}<br><br>
+        <button class="btn-view" onclick="viewRx(${index})">👁️ View</button>
+        <button class="btn-edit" onclick="editRx(${index})">✏️ Edit</button>
+        <button class="btn-delete" onclick="deleteRx(${index})">🗑️ Delete</button>
+      `;
+      // --- End Card Creation Logic ---
+
+      card.innerHTML = html;
+      rxList.appendChild(card); // Append the card to the list container
+    } // --- End of for loop ---
+
+    // Optional: Show a message if no prescriptions match
+    if (rxList.innerHTML === "") {
+        rxList.innerHTML = "<p style='text-align: center; color: #666;'>No prescriptions found matching your criteria.</p>";
+    }
+  }
+
+  function setDateFilter(filterType) {
+    currentFilter = filterType;
+
+    document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => btn.classList.remove('active')); // Be more specific with selector
+
+    // Activate the correct button
+    const buttons = {
+        'all': '.filter-btn[onclick="setDateFilter(\'all\')"]',
+        'today': '.filter-btn[onclick="setDateFilter(\'today\')"]',
+        'yesterday': '.filter-btn[onclick="setDateFilter(\'yesterday\')"]',
+        'custom': '#filterDate' // Not a button, but represents the state
+    };
+
+    if (buttons[filterType] && filterType !== 'custom') {
+        const activeButton = document.querySelector(buttons[filterType]);
+        if (activeButton) activeButton.classList.add('active');
+    }
+
+    // If selecting a custom date, don't force 'All' button active
+     if (filterType !== 'custom') {
+        document.getElementById('filterDate').value = ""; // Clear date input if not custom
+    }
+
+    renderPrescriptions();
+  }
+
+  function clearDateFilter() {
+    document.getElementById("filterDate").value = "";
+    setDateFilter('all'); // Set filter back to 'all' and re-render
+  }
+
+  function viewRx(index) {
+    const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+    if (index >= 0 && index < prescriptions.length) { // Add boundary check
+        localStorage.setItem("prescriptionData", JSON.stringify(prescriptions[index]));
+        window.location.href = "patients-prescription";
+    } else {
+        console.error("Invalid index for viewRx:", index);
+        alert("Error: Could not find the prescription to view.");
+    }
+  }
+
+  function editRx(index) {
+    const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+     if (index >= 0 && index < prescriptions.length) { // Add boundary check
+        const rxToEdit = { ...prescriptions[index], index }; // Pass original index
+        localStorage.setItem("editPrescription", JSON.stringify(rxToEdit));
+        window.location.href = "/edit-prescription";
+     } else {
+        console.error("Invalid index for editRx:", index);
+        alert("Error: Could not find the prescription to edit.");
+    }
+  }
+
+  function deleteRx(index) {
+    const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+     if (index >= 0 && index < prescriptions.length) { // Add boundary check
+        // Confirmation uses the name if available for clarity
+        const rxName = prescriptions[index]?.name || 'this prescription';
+        if (!confirm(`Are you sure you want to delete the prescription for ${rxName}?`)) return;
+
+        prescriptions.splice(index, 1); // Remove item at the correct index
+        localStorage.setItem("prescriptions", JSON.stringify(prescriptions));
+        renderPrescriptions(); // Re-render the list
+     } else {
+        console.error("Invalid index for deleteRx:", index);
+        alert("Error: Could not find the prescription to delete.");
+    }
+  }
+
+  // --- Initial Load ---
+  // Set date filter input default (optional, can be empty)
+  // document.getElementById("filterDate").valueAsDate = new Date(); // Uncomment if you want today's date pre-filled
+
+  // Render prescriptions on page load
+  renderPrescriptions();
+</script>
+
+</body>
+</html>

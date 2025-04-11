@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit Prescription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/medicine.png">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #f7f1e3, #ffffff); /* Use gradient like entry page */
+      margin: 0;
+      padding: 30px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #64bbfd;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #ffffff;
+      margin-bottom: 20px; /* Added margin */
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: 500;
+      margin-bottom: 6px; /* Consistent spacing */
+      display: block;
+    }
+    input, select, textarea {
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box; /* Add box-sizing */
+    }
+    .form-grid { /* Renamed from .row for clarity */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px; /* Space below patient details */
+    }
+    .left-column, .right-column { /* Renamed from .left/.right */
+      flex: 1;
+      min-width: 300px;
+    }
+    .medicine-entry {
+      background: #f1f8ff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .medicine-entry button.remove-med { /* Specific class */
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e53935;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 25px;
+      text-align: center;
+      padding: 0;
+    }
+    .medicine-entry button.remove-med:hover {
+      background: #c62828;
+    }
+
+    button {
+      padding: 12px;
+      width: 100%;
+      margin-top: 10px;
+      background: #1565c0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    button:hover {
+      background: #0d47a1;
+    }
+    /* --- Management Button Styles (Copied from Entry Page) --- */
+    .medicine-management-buttons, .dosage-management-buttons {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping */
+        gap: 10px; /* Space between buttons */
+        margin-bottom: 15px; /* Space below button groups */
+        margin-top: 20px; /* Space above first group */
+    }
+
+    .medicine-management-buttons button, .dosage-management-buttons button {
+        flex: 1; /* Distribute space */
+        min-width: 150px; /* Minimum width before wrapping */
+        font-size: 0.9rem;
+        padding: 10px;
+        margin-top: 0; /* Reset margin-top */
+    }
+
+    /* Specific colors for management buttons */
+    button.add-med-btn { background: #4caf50; } /* Green */
+    button.add-med-btn:hover { background: #388e3c; }
+    button.add-new-med-btn { background: #2196f3; } /* Blue */
+    button.add-new-med-btn:hover { background: #1976d2; }
+    button.delete-med-btn { background: #f44336; } /* Red */
+    button.delete-med-btn:hover { background: #d32f2f; }
+
+    button.add-dosage-btn { background: #ff9800; } /* Orange */
+    button.add-dosage-btn:hover { background: #f57c00; }
+    button.delete-dosage-btn { background: #f44336; } /* Lighter Red */
+    button.delete-dosage-btn:hover { background: #d32f2f; }
+    /* --- End Management Button Styles --- */
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+      background-color: #0d47a1;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+    }
+    .back-button:hover {
+      background-color: #1565c0;
+    }
+    .tapering-section {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      display: none; /* Hidden by default */
+    }
+    .tapering-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    .tapering-row select, .tapering-row input {
+      flex: 1;
+      padding: 8px;
+    }
+    .tapering-toggle {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+    .tapering-toggle input {
+      width: auto;
+      margin-right: 8px;
+    }
+    .add-tapering {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 5px;
+      width: auto; /* Override button default */
+    }
+    .remove-tapering {
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      width: auto; /* Override button default */
+      padding: 0;
+      line-height: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<a href="/priscriptions" class="back-button">← Back to Prescriptions</a>
+
+<div class="container">
+  <h2>✏️ EDIT PRESCRIPTIONS</h2>
+
+  <div class="form-grid">
+    <div class="left-column">
+      <div class="input-group">
+        <label>Patient Name:</label>
+        <input id="pname" type="text" list="nameList" />
+        <datalist id="nameList"></datalist>
+      </div>
+
+      <div class="input-group">
+        <label>Mobile Number:</label>
+        <input id="pmobile" type="text" />
+      </div>
+
+      <div class="input-group">
+        <label>Age:</label>
+        <input id="page" type="text" />
+      </div>
+
+      <div class="input-group">
+        <label>Diagnosis:</label>
+        <input id="pdiagnosis" type="text" list="diagnosisList" />
+        <datalist id="diagnosisList">
+          <!-- Diagnosis options copied from entry page -->
+          <option value="Fever (Pyrexia)">
+          <option value="Common Cold">
+          <option value="Cough">
+          <option value="Sore Throat">
+          <option value="Upper Respiratory Tract Infection (URTI)">
+          <option value="Lower Respiratory Tract Infection (LRTI)">
+          <option value="Pneumonia">
+          <option value="Asthma">
+          <option value="Bronchitis">
+          <option value="Allergic Rhinitis">
+          <option value="COVID-19">
+          <option value="Tuberculosis (TB)">
+          <option value="Hypertension (High Blood Pressure)">
+          <option value="Hypotension (Low Blood Pressure)">
+          <option value="Diabetes Mellitus">
+          <option value="Thyroid Disorder">
+          <option value="Hypothyroidism">
+          <option value="Hyperthyroidism">
+          <option value="Gastritis">
+          <option value="GERD (Acid Reflux)">
+          <option value="Constipation">
+          <option value="Diarrhea">
+          <option value="Irritable Bowel Syndrome (IBS)">
+          <option value="Ulcerative Colitis">
+          <option value="Peptic Ulcer Disease">
+          <option value="Abdominal Pain">
+          <option value="Dyspepsia">
+          <option value="Urinary Tract Infection (UTI)">
+          <option value="Kidney Stone (Renal Calculi)">
+          <option value="Dengue Fever">
+          <option value="Chikungunya">
+          <option value="Malaria">
+          <option value="Typhoid Fever">
+          <option value="Jaundice (Hepatitis)">
+          <option value="Anemia">
+          <option value="Migraine">
+          <option value="Headache">
+          <option value="Vertigo">
+          <option value="Depression">
+          <option value="Anxiety Disorder">
+          <option value="Insomnia">
+          <option value="Skin Rash / Allergy">
+          <option value="Eczema">
+          <option value="Psoriasis">
+          <option value="Acne Vulgaris">
+          <option value="Scabies">
+          <option value="Fungal Infection">
+          <option value="Back Pain">
+          <option value="Neck Pain">
+          <option value="Joint Pain">
+          <option value="Arthritis">
+          <option value="Osteoarthritis">
+          <option value="Rheumatoid Arthritis">
+          <option value="Gout">
+          <option value="Fracture / Injury">
+          <option value="Menstrual Disorder">
+          <option value="PCOS">
+          <option value="Pregnancy (Antenatal Checkup)">
+          <option value="Urinary Incontinence">
+          <option value="Vaginal Discharge">
+          <option value="Dental Pain">
+          <option value="Eye Infection">
+          <option value="Ear Pain / Otitis Media">
+          <option value="Sinusitis">
+          <option value="Allergic Conjunctivitis">
+          <option value="Obesity">
+          <option value="General Checkup / Health Screening">
+        </datalist>
+      </div>
+
+      <div class="input-group">
+        <label>Register Number:</label>
+        <input id="pregno" type="text" />
+      </div>
+
+      <div class="input-group">
+        <label>Attender Name:</label>
+        <input id="attender" type="text" list="attenderList" />
+        <datalist id="attenderList"></datalist>
+      </div>
+    </div>
+
+    <div class="right-column">
+      <div class="input-group">
+        <label>SpO₂:</label>
+        <input id="spo2" type="text" />
+      </div>
+      <div class="input-group">
+        <label>Weight:</label> 
+        <input id="weight" type="text" />
+      </div>
+      <div class="input-group">
+        <label>Blood Pressure:</label>
+        <input id="bp" type="text" />
+      </div>
+      <div class="input-group">
+        <label>Pulse:</label>
+        <input id="pulse" type="text" />
+      </div>
+      <div class="input-group">
+        <label>Temperature:</label> 
+        <input id="temp" type="text" />
+      </div>
+      <div class="input-group"> 
+        <label>Lab Test:</label>
+        <input id="labtest" type="text" list="labTestList" placeholder="Select or enter lab test(s)" />
+        <datalist id="labTestList">
+          <!-- Lab test options copied from entry page -->
+          <option value="CBE - Complete Blood Examination">
+          <option value="CBP - Complete Blood Picture">
+          <option value="RFT - Renal Function Test">
+          <option value="LFT - Liver Function Test">
+          <option value="Blood Sugar - FBS/PPBS/RBS">
+          <option value="HbA1c - Glycated Hemoglobin">
+          <option value="TSH - Thyroid Stimulating Hormone">
+          <option value="T3 T4 TSH Panel">
+          <option value="Urine Routine">
+          <option value="Stool Routine">
+          <option value="Lipid Profile">
+          <option value="ECG">
+          <option value="X-Ray Chest PA View">
+          <option value="Ultrasound Abdomen">
+          <option value="CT Scan - Brain">
+          <option value="MRI Spine">
+          <option value="Vitamin D">
+          <option value="Vitamin B12">
+          <option value="ESR - Erythrocyte Sedimentation Rate">
+          <option value="CRP - C-Reactive Protein">
+          <option value="COVID-19 RT-PCR">
+        </datalist>
+      </div>
+      <div class="input-group">
+        <label>Lab Report:</label>
+        <input id="labreport" type="text" list="labReportList" placeholder="Select or enter lab report(s)" />
+        <datalist id="labReportList">
+          <option value="Normal">
+          <option value="Abnormal">
+          <option value="Pending">
+          <option value="Elevated WBC Count">
+          <option value="Low Hemoglobin">
+          <option value="High Blood Sugar">
+          <option value="Elevated Creatinine">
+          <option value="Abnormal Liver Enzymes">
+          <option value="Positive COVID-19">
+          <option value="Negative">
+          <option value="Inconclusive">
+          <option value="High Cholesterol">
+          <option value="Low Vitamin D">
+          <option value="Bacterial Infection Detected">
+          <option value="Viral Markers Present">
+        </datalist>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medicine Management Buttons -->
+  <div class="medicine-management-buttons">
+    <button class="add-med-btn" onclick="addMedicineEntry()">➕ Add Medicine Entry</button>
+    <button class="add-new-med-btn" onclick="addNewMedicine()">➕ Add New Name</button>
+    <button class="delete-med-btn" onclick="deleteMedicineName()">➖ Delete Name</button>
+  </div>
+  <!-- Dosage Management Buttons -->
+  <div class="dosage-management-buttons">
+    <button class="add-dosage-btn" onclick="addNewDosage()">➕ Add New Dosage</button>
+    <button class="delete-dosage-btn" onclick="deleteDosage()">➖ Delete Dosage</button>
+  </div>
+
+  <div id="medicine-container">
+    <!-- Medicine entries will be loaded/added here -->
+    <datalist id="medicineOptions"></datalist> <!-- Define the datalist once -->
+  </div>
+
+  <button onclick="saveChanges()">💾 Save Changes</button>
+
+</div>
+
+<script>
+  // --- Global Lists & Constants (Copied/Adapted from Entry Page) ---
+  let dosageList = [
+    "¼ tab", "½ tab", "1 tab", "1½ tab", "2 tab", "3 tab",
+    "1-0-1", "1-1-0", "1-0-0", "0-1-0", "1-1-1", "0-0-1",
+    "1/2-1/2-1/2", "1/2-0-1/2", "0-0-1/2", "1/2-0-0",
+    "OD (Once daily)", "BD (Twice daily)", "TDS (Thrice daily)",
+    "QID (Four times daily)", "HS (At bedtime)", "AID", "Q8H",
+    "SOS (When required)", "STAT (Immediately)", "Twice daily",
+    "2.5 ml", "5 ml (1 tsp)", "7.5 ml", "10 ml", "15 ml (1 tbsp)",
+    "20 ml", "25 ml", "30 ml", "50 ml", "100 ml",
+    "1 drop", "2 drops", "3 drops", "4 drops", "5 drops", "10 drops",
+    "0.25 ml", "0.5 ml", "1 ml", "2 ml", "5 ml", "10 ml",
+    "Apply thin layer", "Apply pea-sized amount", "Apply generously",
+    "Apply fingertip unit",
+    "1 puff", "2 puffs", "1 spray", "2 sprays",
+    "1 suppository", "1 sachet", "1 ampoule", "1 vial", "1 patch",
+    "Before food", "After food", "With food", "Empty stomach"
+  ];
+
+  const typeList = ["Tablet", "Capsule", "Syrup", "Injection", "Ointment", "Drops", "Suspension", "Cream", "Gel", "Lotion", "Inhaler", "Respule", "Patch", "Powder", "Sachet", "Suppository", "Mouth Wash", "Soap", "Shampoo"];
+  const remarkList = ["Before Food", "After Food", "With Water", "With Milk", "DTTD", "SOS", "STAT", "Empty Stomach", "At Bedtime", "Continue", "Stop", "Review After", "Apply Locally"];
+
+  const fieldHistories = {
+    pname: "history_names",
+    pdiagnosis: "history_diagnosis",
+    attender: "history_attenders"
+  };
+
+  const medicineListStorageKey = "medicineNamesList";
+
+  const defaultMedicineNames = [ /* Keep default list for initialization */
+    "Paracetamol", "Amoxicillin", "Ciprofloxacin", "Azithromycin", "Ibuprofen",
+    "Metformin", "Amlodipine", "Losartan", "Atorvastatin", "Omeprazole",
+    "Pantoprazole", "Levothyroxine", "Salbutamol", "Montelukast", "Doxycycline",
+    "Multivitamin", "Calcium + Vitamin D3", "Clopidogrel", "Hydrochlorothiazide",
+    "Telmisartan", "Glimepiride", "Glibenclamide", "Domperidone", "Ondansetron",
+    "Rabeprazole", "Ranitidine", "Tramadol", "Cetirizine", "Loratadine",
+    "Fexofenadine", "Metronidazole", "Tinidazole", "Albendazole", "Ivermectin",
+    "Fluconazole", "Betamethasone", "Prednisolone", "Dexamethasone", "Vitamin B Complex",
+    "Iron + Folic Acid", "Insulin", "Thyronorm", "Erythromycin", "Linezolid",
+    "Meropenem", "Piperacillin + Tazobactam", "Amikacin", "Gentamicin", "Tetracycline",
+    "Chlorpheniramine", "Phenylephrine", "Acetaminophen", "Naproxen", "Diclofenac",
+    "Ketorolac", "Aceclofenac", "Nimesulide", "Budesonide", "Beclomethasone",
+    "Mometasone", "Loperamide", "Bisacodyl", "Lactulose", "Sodium Bicarbonate",
+    "Magaldrate + Simethicone", "Gaviscon", "Azee 250", "Montek LC", "Inj Diclofenac Sodium 25mg/ml",
+    "SKELTAB D (metaxalone,diclofenac)", "NERVACE G", "ENZYMIN", "COFTIME SYP", "PANTOPRAZOLE 40MG",
+    "ITROMED 200 MG", "MICOGEL CREAM", "Omnix 100", "ONDEM", "VASOGRAIN",
+    "FLUNARAZINE", "MOXIKIND CV 625", "MOXIKIND CV 375", "ASTHARID EXPECTORANT SYP", "OTOFIT E/D",
+    "Dolo 650 mg", "NEUROBION FORTE", "Orogard Mouth Wash", "Azee 100mg SUS", "Montek LC KID",
+    "STEMETIL MD", "PANTOPRAZOL 40", "PANTOPRAZOL DSR", "UDAPA", "EVION 400 CAP",
+    "AZITHROMYCIN 500MG", "AZITHROMYCIN 250MG", "Omnix 200", "BROMO SYP", "Syr Moxclav BD 228.5mg",
+    "AMBRODIL-S SYRUP", "MOXIKIND-CV DRY SYRUP", "MOXIKIND-CV FORTE DRY SYRUP", "HISTIN 24", "HICET-AX",
+    "OXINA NASAL DROPS", "ALBENDAZOLE SUSP. STRENGTH 200MG/5ML", "CIPLOX EYE DROPS", "OXINA P NASAL DROPS",
+    "SUFRECOF D COUGH SYP", "PARACETAMOL 500MG", "PARACETAMOL 650", "Doxycycline Hyclate Cap. Strength 100mg",
+    "CHESCLAR", "CHESCLAR DM", "CARMICIDE-A", "OPEC 20", "Budecort 0.5mg Respules 2ml",
+    "MEFTAL 250MG", "OPEC 20 MG", "PERIMETHRIN SOAP", "HUMAN MIXTARD 70/30 INJECTION L", "KETO SOAP",
+    "KETOSCALP POWDER", "PROLOMET 25MG", "BENDEX", "BENDEX 200MG SUSPENSION", "CLOTRIMAZOLE MOUTH PAINT",
+    "CHYMORAL FORTE", "CIPLOX-D EYE AND EAR DROPS", "TBN DROPS", "DOXYNEC 100 CAP", "AMOXYCILLINE100MG/1ML DROPS",
+    "CLEARWAX EAR DROPS", "DEXACHLOR E/E DROPS", "CANDID EAR DROPS", "MEGAHEAL OINTMENT", "MUPIROCIN OINTMENT",
+    "T-BACT 2% OINTMENT", "NACRID GEL", "FLUSID CREAM", "FLUSID B CREAM", "DERMOLAM SKIN OINTMENT",
+    "TERBINAFIN CREAM STRENGTH 1% W/W", "MEGASEPT-N", "Aldactone Tablet", "FEBREX PLUS DROPS", "NOCOLD DROP",
+    "AZEE 500", "MEBEX", "Meftal 500 Tablet", "SHELCAL", "FEBREX PLUS AF ORAL DROPS",
+    "CEPHELEXIN 250", "Ondem Injection", "Sucrafil Suspension Sugar Free", "PARACETAMOL 125", "Pantocid DSR Capsule",
+    "WYSOLONE 10", "WYSOLONE 10MG", "PREDNISOLONE SYP", "Nicardia Retard 20 Tablet SR", "OROGARD MOUTH WASH",
+    "RANTAC SYRUP", "ZIN SYP", "KETOKEM SHAMPOO", "ICHTHAMOL GLYCERIN", "ACICLOVIR",
+    "BENDEX 400 TABLET", "DYTOR 10", "DIPTASE-MR", "DERIPHYLLIN INJECTION", "HICET-DC",
+    "ALERID-D", "LEVOFLOX 500", "Ketovate Soap", "DERIPHYLLINE TABLET", "Montair 10 Tablet",
+    "Azee 200mg Dry Syrup", "Hexidine Mouth Wash", "CILAGARD", "CILAGARD10MG", "Meftal Spas",
+    "UDILIV 150", "ECOSPRIN AV 75/10", "ALDACTONE 25", "Phexin 250mg Redisyp Banana", "Telma 40 Tablet",
+    "DEXORANGE PD", "BENDEX 400 liars", "METOLAR", "THYRONORM 25", "Atarax 25mg", "SEPTID D"
+  ];
+
+  let editRxIndex = null; // Index of the prescription being edited
+
+  // --- Local Storage Helper Functions ---
+  function getStoredMedicineNames() {
+    const stored = localStorage.getItem(medicineListStorageKey);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error("Error parsing stored medicine names:", e);
+        return [...defaultMedicineNames]; // Fallback
+      }
+    } else {
+      // Initialize with default if nothing is stored
+      saveMedicineNames([...defaultMedicineNames]); // Save defaults first time
+      return [...defaultMedicineNames];
+    }
+  }
+
+  function saveMedicineNames(names) {
+    names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    localStorage.setItem(medicineListStorageKey, JSON.stringify(names));
+  }
+
+  // --- Populate Datalists and Load History ---
+  function loadHistory() {
+    for (let field in fieldHistories) {
+      const datalist = document.getElementById(field + "List");
+      if (datalist) {
+        const data = JSON.parse(localStorage.getItem(fieldHistories[field]) || "[]");
+        datalist.innerHTML = data.map(val => `<option value="${val}">`).join("");
+      }
+    }
+  }
+
+  function loadMedicineOptions() {
+    const medicineOptionsDatalist = document.getElementById("medicineOptions");
+    if (medicineOptionsDatalist) { // Check if element exists
+      const currentMedicineNames = getStoredMedicineNames();
+      medicineOptionsDatalist.innerHTML = currentMedicineNames
+        .map(name => `<option value="${name}">`)
+        .join('');
+    } else {
+      console.error("Datalist #medicineOptions not found");
+    }
+  }
+
+  window.onload = function () {
+    loadHistory(); // Load history for datalists
+    loadMedicineOptions(); // Load medicine names into the datalist
+
+    const rxToEditData = localStorage.getItem("editPrescription");
+    if (!rxToEditData) {
+      alert("Error: No prescription data found for editing.");
+      window.location.href = "/priscriptions"; // Redirect back
+      return;
+    }
+
+    const rxToEdit = JSON.parse(rxToEditData);
+
+    if (typeof rxToEdit.index === 'undefined') {
+      alert("Error: Prescription index is missing.");
+      window.location.href = "/priscriptions"; // Redirect back
+      return;
+    }
+    editRxIndex = rxToEdit.index;
+
+    // Populate form fields
+    document.getElementById("pname").value = rxToEdit.name || "";
+    document.getElementById("pmobile").value = rxToEdit.phone || ""; // Ensure correct field name
+    document.getElementById("page").value = rxToEdit.age || "";
+    document.getElementById("pdiagnosis").value = rxToEdit.diagnosis || "";
+    document.getElementById("pregno").value = rxToEdit.regno || "";
+    document.getElementById("attender").value = rxToEdit.attender || "";
+    document.getElementById("spo2").value = rxToEdit.spo2 || "";
+    document.getElementById("weight").value = rxToEdit.weight || "";
+    document.getElementById("bp").value = rxToEdit.bp || "";
+    document.getElementById("pulse").value = rxToEdit.pulse || "";
+    document.getElementById("temp").value = rxToEdit.temp || rxToEdit.temperature || ""; // Handle both 'temp' and 'temperature'
+    document.getElementById("labtest").value = rxToEdit.labtest || "";
+    document.getElementById("labreport").value = rxToEdit.labreport || ""; // Load labreport
+
+    // Populate medicine entries
+    const medicineContainer = document.getElementById("medicine-container");
+    medicineContainer.innerHTML = '<datalist id="medicineOptions"></datalist>'; // Reset container but keep datalist
+    loadMedicineOptions(); // Ensure datalist is populated again after reset
+    if (rxToEdit.medicines && Array.isArray(rxToEdit.medicines)) {
+      rxToEdit.medicines.forEach(med => addMedicineEntry(med)); // Pass existing medicine data
+    }
+  };
+
+  // --- Medicine Entry Management ---
+  function addMedicineEntry(med = {}) { // Function renamed for clarity
+    const medDiv = document.createElement("div");
+    medDiv.className = "medicine-entry";
+    const uniqueId = `tapering-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
+    // Sort lists for consistent display
+    dosageList.sort();
+    typeList.sort();
+    remarkList.sort();
+
+    medDiv.innerHTML = `
+      <button type="button" class="remove-med" onclick="this.parentElement.remove()">×</button> 
+
+      <label>Medicine Name:</label>
+      <input class="med-name" type="text" list="medicineOptions" placeholder="Start typing..." value="${med.name || ''}" />
+      
+      <label>Type:</label>
+      <select class="med-type">
+        ${typeList.map(t => `<option value="${t}" ${med.type === t ? 'selected' : ''}>${t}</option>`).join("")}
+      </select>
+
+      <label>Dosage:</label>
+      <select class="med-dose">
+        ${dosageList.map(d => `<option value="${d}" ${med.dosage === d ? 'selected' : ''}>${d}</option>`).join("")}
+      </select>
+
+      <label>Days:</label> 
+      <input class="med-qty" type="number" min="0" value="${med.quantity || med.days || 1}" /> 
+
+      <label>Remark:</label>
+      <input class="med-remark" type="text" list="remarkOptions" value="${med.remark || ''}" />
+      <datalist id="remarkOptions">
+        ${remarkList.map(r => `<option value="${r}">`).join('')}
+      </datalist>
+
+      <label>Additional Content:</label>
+      <textarea class="med-content" rows="3" placeholder="e.g., specific instructions">${med.content || ''}</textarea>
+
+      <div class="tapering-toggle">
+        <input type="checkbox" class="tapering-checkbox" id="${uniqueId}" ${med.tapering ? 'checked' : ''} onchange="toggleTapering(this)">
+        <label for="${uniqueId}">Tapering Required</label>
+      </div>
+
+      <div class="tapering-section" ${med.tapering ? 'style="display:block;"' : 'style="display:none;"'}>
+        <div class="tapering-entries">
+          ${med.tapering && Array.isArray(med.tapering) ? med.tapering.map((t) => `
+            <div class="tapering-row">
+              <select class="taper-dose">
+                ${dosageList.map(d => `<option value="${d}" ${t.dosage === d ? 'selected' : ''}>${d}</option>`).join("")}
+              </select>
+              <input class="taper-days" type="number" min="1" placeholder="Days" value="${t.days || ''}" />
+              <button type="button" class="remove-tapering" onclick="removeTaperingRow(this)">×</button>
+            </div>
+          `).join("") : ''}
+        </div>
+        <button type="button" class="add-tapering" onclick="addTaperingRow(this)">+ Add Tapering Step</button>
+      </div>
+    `;
+    // Find the container *after* the global datalist
+    const container = document.getElementById("medicine-container");
+    container.appendChild(medDiv); // Append new entry
+  }
+
+  function toggleTapering(checkbox) {
+    const taperingSection = checkbox.closest('.medicine-entry').querySelector('.tapering-section');
+    if (taperingSection) {
+      taperingSection.style.display = checkbox.checked ? 'block' : 'none';
+    }
+  }
+
+  function addTaperingRow(button) {
+    const taperingEntries = button.closest('.tapering-section').querySelector('.tapering-entries');
+    const newRow = document.createElement('div');
+    newRow.className = 'tapering-row';
+    dosageList.sort(); // Ensure list is sorted
+    newRow.innerHTML = `
+      <select class="taper-dose">
+        ${dosageList.map(d => `<option value="${d}">${d}</option>`).join("")}
+      </select>
+      <input class="taper-days" type="number" min="1" placeholder="Days" />
+      <button type="button" class="remove-tapering" onclick="removeTaperingRow(this)">×</button>
+    `;
+    taperingEntries.appendChild(newRow);
+  }
+
+  function removeTaperingRow(button) {
+    button.closest('.tapering-row').remove();
+  }
+
+  // --- Medicine Name & Dosage Management (Copied from Entry Page) ---
+  function addNewMedicine() {
+    const newMedicineName = prompt("Enter the name of the new medicine:");
+    if (newMedicineName && newMedicineName.trim() !== "") {
+      const trimmedName = newMedicineName.trim();
+      let currentMedicineNames = getStoredMedicineNames();
+
+      if (currentMedicineNames.some(name => name.toLowerCase() === trimmedName.toLowerCase())) {
+        alert(`Medicine "${trimmedName}" already exists.`);
+        return;
+      }
+      currentMedicineNames.push(trimmedName);
+      saveMedicineNames(currentMedicineNames);
+      loadMedicineOptions(); // Refresh datalist
+      alert(`New medicine "${trimmedName}" added.`);
+    } else if (newMedicineName !== null) {
+      alert("Please enter a valid medicine name.");
+    }
+  }
+
+  function deleteMedicineName() {
+    const nameToDelete = prompt("Enter the exact medicine name to delete:");
+    if (nameToDelete && nameToDelete.trim() !== "") {
+      const trimmedName = nameToDelete.trim();
+      let currentMedicineNames = getStoredMedicineNames();
+      const initialLength = currentMedicineNames.length;
+      
+
+      currentMedicineNames = currentMedicineNames.filter(name => name.toLowerCase() !== trimmedName.toLowerCase());
+
+      if (currentMedicineNames.length < initialLength) {
+        saveMedicineNames(currentMedicineNames);
+        loadMedicineOptions(); // Refresh datalist
+        alert(`Medicine "${trimmedName}" deleted.`);
+      } else {
+        alert(`Medicine "${trimmedName}" not found.`);
+      }
+    } else if (nameToDelete !== null) {
+      alert("Please enter a medicine name to delete.");
+    }
+  }
+
+  function addNewDosage() {
+    const newDosage = prompt("Enter the new dosage:");
+    if (newDosage && newDosage.trim() !== "") {
+      const trimmedDosage = newDosage.trim();
+      if (!dosageList.includes(trimmedDosage)) {
+        dosageList.push(trimmedDosage);
+        dosageList.sort();
+        updateAllDosageDropdowns(); // Refresh dropdowns
+        alert(`New dosage "${trimmedDosage}" added.`);
+      } else {
+        alert(`Dosage "${trimmedDosage}" already exists.`);
+      }
+    } else if (newDosage !== null) {
+      alert("Please enter a valid dosage.");
+    }
+  }
+
+  function deleteDosage() {
+    const dosageToDelete = prompt("Enter the exact dosage to delete:");
+    if (dosageToDelete && dosageToDelete.trim() !== "") {
+      const trimmedDosage = dosageToDelete.trim();
+      const initialLength = dosageList.length;
+      dosageList = dosageList.filter(dosage => dosage !== trimmedDosage);
+
+      if (dosageList.length < initialLength) {
+        updateAllDosageDropdowns(); // Refresh dropdowns
+        alert(`Dosage "${trimmedDosage}" deleted.`);
+      } else {
+        alert(`Dosage "${trimmedDosage}" not found.`);
+      }
+    } else if (dosageToDelete !== null) {
+      alert("Please enter a dosage to delete.");
+    }
+  }
+
+  function updateAllDosageDropdowns() {
+    const allDosageSelects = document.querySelectorAll('.med-dose, .taper-dose');
+    dosageList.sort();
+    allDosageSelects.forEach(select => {
+      const currentValue = select.value;
+      select.innerHTML = dosageList.map(d => `<option value="${d}">${d}</option>`).join('');
+      if (dosageList.includes(currentValue)) {
+        select.value = currentValue;
+      } else {
+        select.selectedIndex = 0; // Select first option if old value is gone
+      }
+    });
+  }
+
+  // --- Save Changes ---
+  function saveChanges() {
+    // Basic validation
+    const name = document.getElementById("pname").value.trim();
+    const mobile = document.getElementById("pmobile").value.trim();
+    if (!name) {
+      alert("Patient Name is required.");
+      document.getElementById("pname").focus();
+      return;
+    }
+    if (!mobile) {
+      alert("Mobile Number is required.");
+      document.getElementById("pmobile").focus();
+      return;
+    }
+
+    const updatedRx = {
+      name: name,
+      phone: mobile,
+      age: document.getElementById("page").value,
+      diagnosis: document.getElementById("pdiagnosis").value.trim(),
+      regno: document.getElementById("pregno").value.trim(),
+      attender: document.getElementById("attender").value.trim(),
+      spo2: document.getElementById("spo2").value,
+      weight: document.getElementById("weight").value,
+      bp: document.getElementById("bp").value,
+      pulse: document.getElementById("pulse").value,
+      temp: document.getElementById("temp").value, // Use 'temp' consistently
+      labtest: document.getElementById("labtest").value,
+      labreport: document.getElementById("labreport").value, // Add labreport
+      date: new Date().toISOString().slice(0, 10), // Update date to today YYYY-MM-DD
+      medicines: []
+    };
+
+    let medicinesValid = true;
+    document.querySelectorAll(".medicine-entry").forEach((entry, index) => {
+      if (!medicinesValid) return; // Stop if previous entry was invalid
+
+      const medName = entry.querySelector(".med-name").value.trim();
+      if (!medName) {
+        alert(`Medicine Name is required for entry #${index + 1}.`);
+        entry.querySelector(".med-name").focus();
+        medicinesValid = false;
+        return;
+      }
+
+      const tapering = [];
+      let taperingValid = true;
+      if (entry.querySelector('.tapering-checkbox').checked) {
+        entry.querySelectorAll('.tapering-row').forEach((row, taperIndex) => {
+          if (!taperingValid) return;
+
+          const taperDays = row.querySelector('.taper-days').value;
+          const taperDose = row.querySelector('.taper-dose').value;
+
+          if (!taperDays || parseInt(taperDays) <= 0) {
+            alert(`Valid days (> 0) needed for tapering #${taperIndex + 1} in medicine entry #${index + 1}.`);
+            row.querySelector('.taper-days').focus();
+            taperingValid = false;
+            return;
+          }
+          if (!taperDose) {
+            alert(`Dosage needed for tapering #${taperIndex + 1} in medicine entry #${index + 1}.`);
+            row.querySelector('.taper-dose').focus();
+            taperingValid = false;
+            return;
+          }
+
+          tapering.push({
+            dosage: taperDose,
+            days: taperDays
+          });
+        });
+      }
+
+      if (!taperingValid) {
+        medicinesValid = false; // Mark overall validation as failed
+        return;
+      }
+
+      updatedRx.medicines.push({
+        name: medName,
+        type: entry.querySelector(".med-type").value,
+        dosage: entry.querySelector(".med-dose").value,
+        quantity: entry.querySelector(".med-qty").value || '0', // Use quantity/days field
+        remark: entry.querySelector(".med-remark").value,
+        content: entry.querySelector(".med-content").value,
+        tapering: tapering.length > 0 ? tapering : null
+      });
+    });
+
+    if (!medicinesValid) {
+      return; // Stop saving if validation failed
+    }
+
+    // --- Update Local Storage ---
+    const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+    if (editRxIndex !== null && editRxIndex >= 0 && editRxIndex < prescriptions.length) {
+      // Update the specific prescription object
+      prescriptions[editRxIndex] = updatedRx;
+      localStorage.setItem("prescriptions", JSON.stringify(prescriptions));
+
+      // Update history lists
+      updateHistory("pname", updatedRx.name);
+      updateHistory("pdiagnosis", updatedRx.diagnosis);
+      updateHistory("attender", updatedRx.attender);
+
+      alert("✅ Prescription updated successfully!");
+      localStorage.removeItem("editPrescription"); // Clean up temp storage
+      window.location.href = "/priscriptions"; // Redirect back to the list
+    } else {
+      console.error("Error: Invalid edit index or prescriptions array.", editRxIndex, prescriptions);
+      alert("Error: Unable to update prescription. Invalid index or data.");
+    }
+  }
+
+  // --- History Update Function (Copied from Entry Page) ---
+  function updateHistory(fieldId, value) {
+    if (!value || !fieldHistories[fieldId]) return;
+
+    const historyKey = fieldHistories[fieldId];
+    let history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+    if (!history.some(item => item.toLowerCase() === value.toLowerCase())) {
+      history.push(value);
+      if (history.length > 50) { // Limit size
+        history = history.slice(history.length - 50);
+      }
+      localStorage.setItem(historyKey, JSON.stringify(history));
+    }
+  }
+
+</script>
+
+</body>
+</html>

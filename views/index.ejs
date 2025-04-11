@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SUHAIM SOFT</title>
+<link rel="icon" href="images/medicine.png">
+    <!-- Favicon -->
+    <link rel="icon" href="https://example.com/favicon.ico" type="image/x-icon">
+
+    <!-- Font Awesome for Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+    <!-- CSS Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #1a1a1a;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+        }
+
+        .navbar:hover {
+            background-color: #333;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style-type: none;
+        }
+
+        .nav-links li {
+            margin: 0 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+            transform: translateY(-5px);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            background-color: white;
+            height: 4px;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        /* Header Section Styles */
+        .header {
+            background-color: #c8e6c9; /* Light Green */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #000000;
+            padding: 0 20px;
+        }
+
+        .header-content h1 {
+            font-size: 60px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        .header-content p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header-content .btn {
+            padding: 12px 30px;
+            background-color: #ffd700;
+            color: #333;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .header-content .btn:hover {
+            background-color: #ff8c00;
+            transform: translateY(-5px);
+        }
+
+        /* Features Section Styles */
+        .features {
+            background-color: #e4f2e3;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .feature-box {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature i {
+            font-size: 50px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Contact Form Styles */
+        .contact-section {
+            background-color: #cdeef2;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .contact-section h2 {
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .contact-form button {
+            padding: 12px 30px;
+            background-color: #ffd700;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-form button:hover {
+            background-color: #ff8c00;
+            transform: translateY(-5px);
+        }
+
+        /* Footer Section Styles */
+        .footer {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 16px;
+        }
+
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .social-icons {
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            color: #ffd700;
+            font-size: 24px;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: #ff8c00;
+        }
+
+        /* Boxed Section Styles */
+        .boxed-section {
+            background-color: #fff;
+            padding: 40px 20px;
+            margin-top: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .boxed-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .boxed-section p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .boxed-section .btn {
+            padding: 12px 30px;
+            background-color: #ffd700;
+            color: #333;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .boxed-section .btn:hover {
+            background-color: #ff8c00;
+            transform: translateY(-5px);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 40px;
+            }
+
+            .header-content p {
+                font-size: 16px;
+            }
+
+            .feature-box {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .feature {
+                width: 80%;
+                margin: 0 auto;
+            }
+
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+                width: 100%;
+                text-align: left;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content h1 {
+                font-size: 30px;
+            }
+
+            .header-content p {
+                font-size: 14px;
+            }
+
+            .contact-form {
+                padding: 20px;
+            }
+
+            .boxed-section h2 {
+                font-size: 28px;
+            }
+
+            .boxed-section p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SUHAIM SOFT</title>
+    <!-- Font Awesome for Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #1a1a1a;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        /* Nav Links */
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+            transform: translateY(-5px);
+        }
+
+        /* Hamburger Styles */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            width: 30px;
+            height: 5px;
+            background-color: white;
+        }
+
+        /* Mobile Styles */
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #1a1a1a;
+                flex-direction: column;
+                align-items: center;
+                display: none;
+                z-index: 1;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 15px 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="#home" class="logo">Suhaim App</a>
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home"><i>🏠</i> Home</a></li>
+            <li><a href="#about"><i>ℹ</i> About</a></li>
+            <li><a href="#contact"><i>📞</i> Contact</a></li>
+            <li><a href="/login"><i>🔑</i> Login</a></li>
+            <li><a href="/register"><i>📝</i> Create Account</a></li>
+            <ul>
+    <!-- Create Account Link -->
+    <li>
+        <a href="/register">
+           
+        </a>
+    </li>
+
+    <!-- Staff Login Link -->
+    <li>
+        
+        </a>
+    </li>
+</ul>
+
+
+
+
+        </ul>
+    </nav>
+
+    <!-- JavaScript for toggling the menu -->
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
+
+
+    <!-- Header Section -->
+    <header id="home" class="header">
+        <div class="header-content">
+            <h1>SUHAIM SOFT</h1>
+            <p>Transform healthcare with AI-driven Electronic Medical Records (EMRs) that are secure, efficient, and predictive.</p>
+            <a href="#features" class="btn">Learn More</a>
+        </div>
+    </header>
+
+    <!-- Boxed Section for AI-Powered EMR Systems -->
+    <section class="boxed-section">
+        <h2>SUHAIM SOFT</h2>
+        <p>Transform healthcare with AI-driven Electronic Medical Records (EMRs) that are secure, efficient, and predictive. With the power of Artificial Intelligence, EMRs are now smarter, faster, and more capable of supporting healthcare professionals and improving patient outcomes.</p>
+        <a href="#features" class="btn">Learn More</a>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2>Key Features</h2>
+        <div class="feature-box">
+            <div class="feature">
+                <i class="fas fa-heartbeat"></i>
+                <h3>Improved Patient Care</h3>
+                <p>AI-powered EMR systems analyze patient data in real-time, offering insights that help healthcare providers deliver personalized care.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Enhanced Data Security</h3>
+                <p>With advanced encryption and AI-based security measures, EMRs provide a higher level of data protection, ensuring patient privacy.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-cogs"></i>
+                <h3>Increased Efficiency</h3>
+                <p>AI-driven automation reduces administrative burden, enabling healthcare professionals to focus more on patient care.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section id="contact" class="contact-section">
+        <h2>Contact Us</h2>
+        <div class="contact-form">
+            <form action="#" method="POST">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <p>&copy; 2025 SUHAIM SOFT Systems. All Rights Reserved. 
+        <div class="social-icons">
+            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

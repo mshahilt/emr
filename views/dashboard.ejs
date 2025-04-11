@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" href="images/medicine.png">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f1e3;
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    .container {
+      display: flex;
+      flex: 1;
+    }
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(to bottom, #9b81ce, #8e2de2);
+      color: white;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      animation: slideInLeft 1s ease;
+    }
+    @keyframes slideInLeft {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .sidebar h2 {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      margin: 1rem 0;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      animation: slideFade 1s ease;
+    }
+    @keyframes slideFade {
+      from { transform: translateX(40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .card {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .profile img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #4a00e0;
+    }
+    .section-title {
+      margin-bottom: 0.8rem;
+      color: #4a00e0;
+      font-weight: bold;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+    }
+    li {
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #4a00e0;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .highlight:hover {
+      text-decoration: underline;
+      color: #6a00e0;
+    }
+    .reminder-icon {
+      font-size: 18px;
+      color: #4a00e0;
+      margin-right: 8px;
+    }
+    .ringing {
+      animation: ringBell 1s infinite;
+    }
+    .reminder-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .reminder-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    @keyframes ringBell {
+      0% { transform: rotate(0); }
+      25% { transform: rotate(15deg); }
+      50% { transform: rotate(-15deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0); }
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 1rem;
+        justify-content: space-around;
+      }
+      .sidebar h2 {
+        display: none;
+      }
+      .sidebar a {
+        margin: 0.5rem;
+        font-size: 14px;
+        flex-direction: column;
+        align-items: center;
+      }
+      .main {
+        padding: 1rem;
+      }
+      .profile {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bellSound" src="audio/notification-2-269292.mp3" preload="auto"></audio>
+
+<div class="container">
+  <div class="sidebar">
+    <h2><i class="fas fa-user-md"></i> Dr Dashboard</h2>
+    <a href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/book-appoinment"><i class="fas fa-calendar-check"></i> Book Appointment</a>
+    <a href="/priscriptions"><i class="fas fa-prescription-bottle-alt"></i>Patient History</a>
+    <a href="/patients"><i class="fas fa-users"></i> Patients List</a>
+    <a href="/support"><i class="fas fa-headset"></i> Support</a>
+    <a href="/" style="margin-left: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    
+
+  </div>
+
+  <div class="main">
+    <div class="card profile">
+      <img id="profilePic" src="" alt="Doctor Photo">
+      <div>
+        <h2 id="docName">Doctor Name</h2>
+        <p id="docNumber">Phone Number</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">
+        <i id="ringIcon" class="fas fa-bell reminder-icon"></i>
+        Appointment Reminders
+      </h3>
+      <ul id="reminderList"></ul>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">
+        <i class="fas fa-prescription-bottle-alt"></i> Prescriptions
+      </h3>
+      <a href="/priscriptions" class="nav-link">
+        <i class="fas fa-eye"></i> View Prescription
+      </a>
+      <br />
+     
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = JSON.parse(localStorage.getItem("doctorData"));
+  if (data) {
+    document.getElementById("profilePic").src = data.photo;
+    document.getElementById("docName").textContent = data.name;
+    document.getElementById("docNumber").textContent = "Phone: " + data.number;
+  }
+
+  let patients = JSON.parse(localStorage.getItem("patients")) || [];
+
+  const reminderList = document.getElementById("reminderList");
+  const bellSound = document.getElementById("bellSound");
+  const ringIcon = document.getElementById("ringIcon");
+
+  function renderReminders() {
+    reminderList.innerHTML = "";
+
+    if (patients.length === 0) {
+      reminderList.innerHTML = `<li>No appointments yet.</li>`;
+      return;
+    }
+
+    setTimeout(() => {
+      const playPromise = bellSound.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          ringIcon.classList.add("ringing");
+        }).catch(() => {
+          alert("🔔 New patient: " + patients[patients.length - 1].name);
+        });
+      }
+    }, 1000);
+
+    patients.slice(-5).reverse().forEach((patient, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="reminder-text">
+          <span><i class="fas fa-bell reminder-icon"></i> <a href="/patients" class="highlight">${patient.name}</a> (Age: ${patient.age})</span>
+          <small style="color:#888;">Date: ${patient.date || 'N/A'}</small>
+        </div>
+        <div class="reminder-actions">
+          <button class="delete-btn" onclick="deleteReminder(${patients.length - 1 - index})"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      `;
+      reminderList.appendChild(li);
+    });
+  }
+
+  function deleteReminder(index) {
+    patients.splice(index, 1);
+    localStorage.setItem("patients", JSON.stringify(patients));
+    renderReminders();
+  }
+
+  renderReminders();
+</script>
+
+</body>
+</html>
