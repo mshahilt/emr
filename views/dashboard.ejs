@@ -2,286 +2,694 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Doctor Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" href="images/medicine.png">
   <style>
-    * { box-sizing: border-box; }
-    body {
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #f72585;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f7f1e3;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f4f7fa;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .dashboard {
       display: flex;
       min-height: 100vh;
-      flex-direction: column;
     }
-    .container {
-      display: flex;
-      flex: 1;
-    }
+
     .sidebar {
-      width: 220px;
-      background: linear-gradient(to bottom, #9b81ce, #8e2de2);
+      width: 280px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
       color: white;
-      padding: 2rem 1rem;
       display: flex;
       flex-direction: column;
-      animation: slideInLeft 1s ease;
+      padding: 2rem 1.5rem;
+      position: fixed;
+      height: 100vh;
+      transition: var(--transition);
+      z-index: 10;
+      box-shadow: var(--shadow);
     }
-    @keyframes slideInLeft {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .sidebar h2 {
-      font-size: 1.5rem;
+
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-      margin: 1rem 0;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: 0.3s;
+
+    .profile-container {
+      position: relative;
+      margin-bottom: 1rem;
     }
-    .sidebar a:hover {
-      text-decoration: underline;
-    }
-    .main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 2rem;
-      animation: slideFade 1s ease;
-    }
-    @keyframes slideFade {
-      from { transform: translateX(40px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .card {
-      background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 15px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .profile img {
-      width: 80px;
-      height: 80px;
+
+    .sidebar img {
+      width: 110px;
+      height: 110px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #4a00e0;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
     }
-    .section-title {
-      margin-bottom: 0.8rem;
-      color: #4a00e0;
-      font-weight: bold;
+
+    .sidebar img:hover {
+      transform: scale(1.05);
+    }
+
+    .online-indicator {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--success);
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      bottom: 8px;
+      right: 8px;
+    }
+
+    .sidebar h3 {
+      margin: 10px 0 5px;
       font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .sidebar p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .menu {
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+
+    .menu a {
       display: flex;
       align-items: center;
-      gap: 8px;
+      padding: 12px 18px;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      margin: 8px 0;
+      transition: var(--transition);
+      font-weight: 500;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+
+    .menu a:before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      margin-right: 12px;
+      transition: var(--transition);
+    }
+
+    .menu a:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    .menu a:hover:before {
+      background: white;
+      width: 8px;
+      height: 8px;
+    }
+
+    .menu a:first-child {
+      background: white;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .menu a:first-child:before {
+      background: var(--primary);
+    }
+
+    .main {
+      flex-grow: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      transition: var(--transition);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h2 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 30px;
+      padding: 8px 16px;
+      margin-right: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      outline: none;
+      font-size: 0.9rem;
+      width: 180px;
+    }
+
+    .notifications {
+      position: relative;
+      cursor: pointer;
+    }
+
+    #ringIcon {
+      background: white;
+      color: var(--primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+
+    #ringIcon:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-right: 1rem;
+    }
+
+    .stats-info h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .stats-info p {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .reminders {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
       margin-top: 1rem;
     }
-    li {
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 15px;
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .view-all {
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .reminder-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .reminder-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .reminder-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .reminder-list::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+
+    .reminder-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 0.8rem;
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      transition: var(--transition);
+    }
+
+    .reminder-item:hover {
+      background: #eef2ff;
+      transform: translateX(5px);
+    }
+
+    .patient-info {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      flex-grow: 1;
+      cursor: pointer;
     }
-    .highlight {
-      font-weight: bold;
-      color: #4a00e0;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-    .highlight:hover {
-      text-decoration: underline;
-      color: #6a00e0;
-    }
-    .reminder-icon {
-      font-size: 18px;
-      color: #4a00e0;
-      margin-right: 8px;
-    }
-    .ringing {
-      animation: ringBell 1s infinite;
-    }
-    .reminder-text {
+
+    .patient-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 12px;
     }
+
+    .patient-details h4 {
+      font-size: 1rem;
+      margin-bottom: 3px;
+    }
+
+    .patient-details p {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
     .reminder-actions {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .delete-btn {
-      background: none;
+
+    .reminder-actions button {
       border: none;
-      color: red;
+      background: none;
       cursor: pointer;
-      font-size: 16px;
+      border-radius: var(--border-radius);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
     }
-    @keyframes ringBell {
-      0% { transform: rotate(0); }
-      25% { transform: rotate(15deg); }
-      50% { transform: rotate(-15deg); }
-      75% { transform: rotate(10deg); }
-      100% { transform: rotate(0); }
+
+    .delete-btn {
+      color: var(--danger);
     }
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-      }
+
+    .view-btn {
+      color: var(--primary);
+    }
+
+    .reminder-actions button:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: scale(1.1);
+    }
+
+    .no-reminders {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--gray);
+    }
+
+    @media (max-width: 992px) {
       .sidebar {
-        width: 100%;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 1rem;
-        justify-content: space-around;
-      }
-      .sidebar h2 {
-        display: none;
-      }
-      .sidebar a {
-        margin: 0.5rem;
-        font-size: 14px;
-        flex-direction: column;
-        align-items: center;
+        width: 240px;
       }
       .main {
-        padding: 1rem;
+        margin-left: 240px;
       }
-      .profile {
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .header {
         flex-direction: column;
         align-items: flex-start;
       }
-      .card {
+      
+      .header-right {
+        width: 100%;
+        margin-top: 1rem;
+        justify-content: space-between;
+      }
+      
+      .search-box {
+        width: 100%;
+        margin-right: 10px;
+      }
+      
+      .search-box input {
+        width: 100%;
+      }
+      
+      .card-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main {
         padding: 1rem;
       }
+      
+      .reminder-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .reminder-actions {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    .dark-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .dark-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
     }
   </style>
 </head>
 <body>
 
-<audio id="bellSound" src="audio/notification-2-269292.mp3" preload="auto"></audio>
+<div class="dashboard">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="profile-container">
+        <img id="profilePic" src="doctor.png" alt="Doctor" />
+        <span class="online-indicator"></span>
+      </div>
+      <h3 id="docName">Dr. Name</h3>
+      <p id="docNumber">Phone: +91XXXXXXXXXX</p>
+    </div>
 
-<div class="container">
-  <div class="sidebar">
-    <h2><i class="fas fa-user-md"></i> Dr Dashboard</h2>
-    <a href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/book-appoinment"><i class="fas fa-calendar-check"></i> Book Appointment</a>
-    <a href="/priscriptions"><i class="fas fa-prescription-bottle-alt"></i>Patient History</a>
-    <a href="/patients"><i class="fas fa-users"></i> Patients List</a>
-    <a href="/support"><i class="fas fa-headset"></i> Support</a>
-    <a href="/" style="margin-left: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    
-
+    <div class="menu">
+      <a href="#">Dashboard</a>
+      <a href="/book-appoinment">Book Appointment</a>
+      <a href="/priscriptions">Patient History</a>
+      <a href="/patients">Patients List</a>
+      <a href="/support">Support</a>
+      <a href="/">Logout</a>
+    </div>
   </div>
 
   <div class="main">
-    <div class="card profile">
-      <img id="profilePic" src="" alt="Doctor Photo">
-      <div>
-        <h2 id="docName">Doctor Name</h2>
-        <p id="docNumber">Phone Number</p>
+    <div class="header">
+      <button class="mobile-toggle" id="mobileToggle">☰</button>
+      <h2>Doctor Dashboard</h2>
+      
+      <div class="header-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" placeholder="Search patients..." />
+        </div>
+        
+        <div class="notifications">
+          <div id="ringIcon">🔔</div>
+          <span class="notification-badge" id="notificationCount">0</span>
+          <audio id="bellSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_89b3b6ec51.mp3?filename=notification-132483.mp3"></audio>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h3 class="section-title">
-        <i id="ringIcon" class="fas fa-bell reminder-icon"></i>
-        Appointment Reminders
-      </h3>
-      <ul id="reminderList"></ul>
+    <div class="card-container">
+      <div class="stats-card">
+        <div class="stats-icon" style="background: rgba(67, 97, 238, 0.1); color: var(--primary);">👥</div>
+        <div class="stats-info">
+          <h3 id="patientCount">0</h3>
+          <p>Total Patients</p>
+        </div>
+      </div>
+      
+      <div class="stats-card">
+        <div class="stats-icon" style="background: rgba(247, 37, 133, 0.1); color: var(--secondary);">📅</div>
+        <div class="stats-info">
+          <h3>0</h3>
+          <p>Today's Appointments</p>
+        </div>
+      </div>
+      
+      <div class="stats-card">
+        <div class="stats-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">⚕️</div>
+        <div class="stats-info">
+          <h3>0</h3>
+          <p>Consultations</p>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3 class="section-title">
-        <i class="fas fa-prescription-bottle-alt"></i> Prescriptions
-      </h3>
-      <a href="/priscriptions" class="nav-link">
-        <i class="fas fa-eye"></i> View Prescription
-      </a>
-      <br />
-     
-      </a>
+    <div class="reminders">
+      <div class="section-header">
+        <h3>Upcoming Appointments</h3>
+        <a href="#" class="view-all">View All</a>
+      </div>
+      
+      <div class="reminder-list" id="reminderList">
+      </div>
     </div>
   </div>
 </div>
 
+<button class="dark-toggle" title="Toggle dark mode">🌙</button>
+
 <script>
   const data = JSON.parse(localStorage.getItem("doctorData"));
   if (data) {
-    document.getElementById("profilePic").src = data.photo;
+    document.getElementById("profilePic").src = data.photo || "doctor.png";
     document.getElementById("docName").textContent = data.name;
     document.getElementById("docNumber").textContent = "Phone: " + data.number;
   }
-
   let patients = JSON.parse(localStorage.getItem("patients")) || [];
-
   const reminderList = document.getElementById("reminderList");
   const bellSound = document.getElementById("bellSound");
   const ringIcon = document.getElementById("ringIcon");
-
-  function renderReminders() {
+  const notificationCount = document.getElementById("notificationCount");
+  const patientCount = document.getElementById("patientCount");
+  const mobileToggle = document.getElementById("mobileToggle");
+  const sidebar = document.getElementById("sidebar");
+  
+  mobileToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+  });
+  function updateNotificationCount() {
+    notificationCount.textContent = patients.length;
+    patientCount.textContent = patients.length;
+  }
+  function loadReminders() {
     reminderList.innerHTML = "";
-
+    
     if (patients.length === 0) {
-      reminderList.innerHTML = `<li>No appointments yet.</li>`;
-      return;
-    }
-
-    setTimeout(() => {
-      const playPromise = bellSound.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          ringIcon.classList.add("ringing");
-        }).catch(() => {
-          alert("🔔 New patient: " + patients[patients.length - 1].name);
-        });
-      }
-    }, 1000);
-
-    patients.slice(-5).reverse().forEach((patient, index) => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div class="reminder-text">
-          <span><i class="fas fa-bell reminder-icon"></i> <a href="/patients" class="highlight">${patient.name}</a> (Age: ${patient.age})</span>
-          <small style="color:#888;">Date: ${patient.date || 'N/A'}</small>
-        </div>
-        <div class="reminder-actions">
-          <button class="delete-btn" onclick="deleteReminder(${patients.length - 1 - index})"><i class="fas fa-trash-alt"></i></button>
+      reminderList.innerHTML = `
+        <div class="no-reminders">
+          <p>No appointments scheduled</p>
         </div>
       `;
-      reminderList.appendChild(li);
+      return;
+    }
+    
+    patients.forEach((p, index) => {
+      const firstInitial = p.name.charAt(0).toUpperCase();
+      
+      const div = document.createElement("div");
+      div.className = "reminder-item";
+      div.innerHTML = `
+        <div class="patient-info" onclick="goToPatient(${index})">
+          <div class="patient-avatar">${firstInitial}</div>
+          <div class="patient-details">
+            <h4>${p.name}</h4>
+            <p>Age: ${p.age} years</p>
+          </div>
+        </div>
+        <div class="reminder-actions">
+          <button class="view-btn" onclick="goToPatient(${index})">👁️</button>
+          <button class="delete-btn" onclick="deleteReminder(${index})">🗑️</button>
+        </div>
+      `;
+      reminderList.appendChild(div);
     });
+
+    if (patients.length > 0) {
+      bellSound.play();
+      ringIcon.classList.add("pulse");
+      setTimeout(() => ringIcon.classList.remove("pulse"), 2000);
+    }
   }
 
   function deleteReminder(index) {
     patients.splice(index, 1);
     localStorage.setItem("patients", JSON.stringify(patients));
-    renderReminders();
+    loadReminders();
+    updateNotificationCount();
+  }
+  function goToPatient(index) {
+    const patient = patients[index];
+    localStorage.setItem("currentPatient", JSON.stringify(patient));
+    window.location.href = "patientlist.html";
   }
 
-  renderReminders();
+  ringIcon.addEventListener("click", loadReminders);
+  
+  loadReminders();
+  updateNotificationCount();
 </script>
 
 </body>
